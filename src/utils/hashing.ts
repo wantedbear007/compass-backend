@@ -1,20 +1,30 @@
-export class CaesarCipher {
-  private static readonly alphabet: string = "abcdefghijklmnopqrstuvwxyz";
-
+export class Hashing {
   static encrypt(text: string, shift: number): string {
-    return text
-      .toLowerCase()
-      .split("")
-      .map((char) => {
-        const index = CaesarCipher.alphabet.indexOf(char);
-        if (index === -1) return char;
-        const newIndex = (index + shift) % 26;
-        return CaesarCipher.alphabet[newIndex];
-      })
-      .join("");
+    let result = "";
+
+    for (let i = 0; i < text.length; i++) {
+      let char = text[i];
+
+      if (char.match(/[a-z]/i)) {
+        const code = text.charCodeAt(i);
+
+        // Encrypt uppercase letters
+        if (char.toUpperCase() === char) {
+          char = String.fromCharCode(((code - 65 + shift) % 26) + 65);
+        }
+        // Encrypt lowercase letters
+        else {
+          char = String.fromCharCode(((code - 97 + shift) % 26) + 97);
+        }
+      }
+
+      result += char;
+    }
+
+    return result;
   }
 
   static decrypt(text: string, shift: number): string {
-    return CaesarCipher.encrypt(text, 26 - shift);
+    return Hashing.encrypt(text, 26 - shift);
   }
 }

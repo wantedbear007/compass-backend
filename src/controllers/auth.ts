@@ -1,14 +1,15 @@
 import { Context } from "hono";
 import { v4 as uuidv4 } from "uuid";
 import { Prisma } from "@prisma/client";
-import { CaesarCipher } from "../utils/hashing";
-// import { prismaInstance } from "..";
-import { PrismaClient } from '@prisma/client/edge'
-import { withAccelerate } from '@prisma/extension-accelerate'
+// import {  Hashing } from "../utils/hashing";
+import { Hashing } from "../utils/hashing";
+
+
 import { databaseInstance } from "./database";
+
+
 // create account
 export async function createAccount(c: Context) {
-
   const body = await c.req.json();
 
   try {
@@ -20,14 +21,13 @@ export async function createAccount(c: Context) {
     const profile: string = body["profile"];
 
     if (!(username || password || email || name)) {
-      return c.json({message: "All fields required "}, 203);
+      return c.json({ message: "All fields required " }, 203);
     }
 
-    console.log(username, password, email, name, profile);
+    // console.log(username, password, email, name, profile);
 
-    // databaseInstance.$connect;
-
-    const hashedPassword: string = CaesarCipher.encrypt(password, 10);
+    const hashedPassword: string = Hashing.encrypt(password, 10);
+    // console.log(hashedPassword)
 
     await databaseInstance.user.create({
       data: {
@@ -40,22 +40,22 @@ export async function createAccount(c: Context) {
       },
     });
 
-    return c.json({
-      status: "account created successfully.",
-    }, 201);
+    return c.json(
+      {
+        status: "account created successfully.",
+      },
+      201
+    );
   } catch (err: any) {
-    // if (err instanceof Prisma.PrismaClientKnownRequestError) {
-    //   if (err.code === "P2002") {
-    //     return c.status(406);
-    //   } else return c.status(500);
-    // } else {
-        //     return c.json({message: "Internal error"}, 500)
-        // }
-            console.log(err);
-        return c.json({message: "Internal error"}, 500)
-
+    if (err instanceof Prisma.PrismaClientKnownRequestError) {
+      if (err.code === "P2002") {
+        return c.status(406);
+      } else return c.status(500);
+    } else {
+      return c.json({ message: "Internal error" }, 500);
+    }
   } finally {
-    // databaseInstance.$disconnect;
+    databaseInstance.$disconnect;
   }
 }
 
