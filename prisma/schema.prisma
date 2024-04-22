@@ -9,6 +9,31 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  userId Int @id @unique @default(autoincrement())
+  createdAt DateTime @default(now())
+  email String @unique
+  username String @unique
+  password String
+  name String
+  unique String @unique
+  totalProducts Int @default(0)
+  profile String @default("na")
+
+  // relation field
+  products Product[]
+}
+
+model Product {
+  id Int @id @default(autoincrement())
+  
+  // relation field
+  author User @relation(fields: [productId], references: [userId])
+  productId Int
+
 }
