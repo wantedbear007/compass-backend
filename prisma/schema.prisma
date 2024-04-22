@@ -1,11 +1,6 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
+  engineType = "library"
 }
 
 datasource db {
@@ -23,17 +18,25 @@ model User {
   name String
   unique String @unique
   totalProducts Int @default(0)
-  profile String @default("na")
+  profile String @default("https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg")
 
   // relation field
   products Product[]
 }
 
 model Product {
-  id Int @id @default(autoincrement())
+  id Int @id @unique @default(autoincrement())
+  productId Int @unique @default(autoincrement())
+  expireDate String
+  barCodeID String
+  name String
+  description String @default("NA")
+  region String @default("SouthEast Asia")
+  imageUrl String @default("https://i.pinimg.com/736x/32/47/eb/3247eba14cadb3a7475b8e7edd2e0755.jpg")
+  brand String
+  category String @default("Uncategorized")
+  createdDate DateTime @default(now())
   
   // relation field
   author User @relation(fields: [productId], references: [userId])
-  productId Int
-
 }
