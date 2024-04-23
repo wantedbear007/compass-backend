@@ -1,8 +1,6 @@
-// import { PrismaClient } from "@prisma/client";
 import { Context, Hono } from "hono";
 import { cors } from "hono/cors";
 import { csrf } from "hono/csrf";
-// import { createAccount } from "./controllers/auth";
 import { createAccount, login } from "./controllers/auth";
 import registerProducts, {
   deleteProduct,
@@ -30,8 +28,8 @@ app.get("/", (c: Context) => {
 });
 
 // auth services
-app.post("/v1/createAccount", createAccount);
-app.post("/v1/login", login);
+app.post("/v1/auth/createAccount", createAccount);
+app.post("/v1/auth/login", login);
 // for debug
 // app.post("/v1/verify", getDetails);
 

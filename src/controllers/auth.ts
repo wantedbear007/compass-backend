@@ -4,7 +4,7 @@ import { Prisma } from "@prisma/client";
 import { Hashing } from "../utils/hashing";
 
 import { databaseInstance } from "./database";
-import { prismaInstance } from "..";
+// import { prismaInstance } from "..";
 import { HASH } from "../utils/constants";
 import { jwt } from "hono/jwt";
 import { decode, sign, verify } from "hono/jwt";
@@ -22,7 +22,7 @@ export async function createAccount(c: Context) {
     const name: string = body["name"];
     const profile: string = body["profile"];
 
-    if (!(username || password || email || name)) {
+    if (!(username && password && email && name)) {
       return c.json({ message: "All fields required " }, 203);
     }
 
@@ -33,11 +33,11 @@ export async function createAccount(c: Context) {
 
     await databaseInstance.user.create({
       data: {
-        username: username,
+        username,
         password: hashedPassword,
-        email: email,
-        name: name,
-        profile: profile,
+        email,
+        name,
+        profile,
         // unique: uuidv4(),
       },
     });
@@ -48,21 +48,24 @@ export async function createAccount(c: Context) {
       },
       201
     );
-  } catch (err: any) {
-    console.log(err);
-    // return c.json(
-    //   {
-    //     status: "Internal server errror.",
-    //   },
-    //   400
-    // );
+  } catch (err) {
     if (err instanceof Prisma.PrismaClientKnownRequestError) {
-      if (err.code === "P2002") {
-        return c.json({ message: "Email address taken" }, 406);
-      } else return c.json({ message: "Internal server error try later" }, 500);
-    } else {
-      return c.json({ message: "Internal error" }, 500);
+      console.log("hello from bhanu")
     }
+    return c.json({ message: "Internal error" }, 500);
+
+
+    // console.log(err);
+
+    // if (err instanceof Prisma.PrismaClientKnownRequestError) {
+    //   if (err.code == "P2002") {
+    //     return c.json({ message: "Email address already taken" }, 409);
+    //   } else {
+    //     return c.json({ message: "Internal server error try later" }, 500);
+    //   }
+    // } else {
+    //   return c.json({ message: "Internal error" }, 500);
+    // }
   } finally {
     databaseInstance.$disconnect;
   }
@@ -78,7 +81,7 @@ export async function login(c: Context) {
     if (!(username || password))
       return c.json({ msg: "all fields required" }, 203);
 
-    const user = await prismaInstance.user.findUnique({
+    const user = await databaseInstance.user.findUnique({
       where: {
         username: username,
         password: Hashing.decrypt(password, HASH),
@@ -118,20 +121,20 @@ export async function login(c: Context) {
     console.log(err);
     return c.json({ msg: "failed with error" }, 500);
   } finally {
-    prismaInstance.$disconnect;
+    databaseInstance.$disconnect;
   }
 }
 
-export async function getDetails(c: Context) {
-  const bhanu = await c.req.json();
-  console.log(bhanu["token"]);
+// export async function getDetails(c: Context) {
+//   const bhanu = await c.req.json();
+//   // console.log(bhanu["token"]);
 
-  const lol = bhanu["token"];
-  const del = await verifyUser(lol);
-  console.log(del);
+//   const lol = bhanu["token"];
+//   const del = await verifyUser(lol);
+//   // console.log(del);
 
-  return c.json({ msg: bhanu["token"] });
-}
+//   return c.json({ msg: bhanu["token"] });
+// }
 
 export async function verifyUser(token: string): Promise<boolean> {
   try {
