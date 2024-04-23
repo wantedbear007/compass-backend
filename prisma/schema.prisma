@@ -27,7 +27,6 @@ model User {
 
 model Product {
   id          Int      @id @unique @default(autoincrement())
-  authorId    Int      @unique
   expireDate  String
   barCodeID   String
   name        String
@@ -40,4 +39,5 @@ model Product {
   
   // relation field
   author      User     @relation(fields: [authorId], references: [userId])
+  authorId    Int      
 }

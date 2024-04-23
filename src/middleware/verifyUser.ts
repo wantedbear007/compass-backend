@@ -1,14 +1,28 @@
-import { Context } from "hono";
 import { verify } from "hono/jwt";
 import { JWT_SECRET } from "../utils/constants";
 
-export async function verifyUser(c: Context) {
+export interface verifyUserResponse {
+  success: boolean;
+  userId?: number;
+}
+
+export async function verifyUser(token: string): Promise<verifyUserResponse> {
+  let res: verifyUserResponse = {
+    success: false,
+  };
+
   try {
-    const token = c.req.header("token");
-    if (!token) return c.json({ message: "unauthorized" }, 401);
     const decoded = await verify(token.slice(1, token.length - 1), JWT_SECRET);
-    return decoded["id"];
+
+    if (decoded) {
+      res.success = true;
+      res.userId = decoded["id"];
+      return res;
+    } else {
+      res.success = false;
+      return res;
+    }
   } catch (err: any) {
-    return null;
+    return res;
   }
 }

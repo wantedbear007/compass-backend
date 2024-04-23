@@ -58,8 +58,8 @@ export async function createAccount(c: Context) {
     // );
     if (err instanceof Prisma.PrismaClientKnownRequestError) {
       if (err.code === "P2002") {
-        return c.status(406);
-      } else return c.status(500);
+        return c.json({ message: "Email address taken" }, 406);
+      } else return c.json({ message: "Internal server error try later" }, 500);
     } else {
       return c.json({ message: "Internal error" }, 500);
     }
