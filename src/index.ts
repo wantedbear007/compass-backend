@@ -8,6 +8,7 @@ import { withAccelerate } from "@prisma/extension-accelerate";
 import { createAccount, getDetails, login, verifyUser } from "./controllers/auth";
 import { jwt } from "hono/jwt";
 import { JWT_SECRET } from "./utils/constants";
+import registerProducts from "./controllers/products";
 
 type Bindings = {
   JWT_SECRET: string;
@@ -19,11 +20,9 @@ export const prismaInstance = new PrismaClient().$extends(withAccelerate());
 app.use("/v1/*", cors());
 app.use(csrf());
 
-app.get('/auth/page', (c) => {
-  // const payload = c.get('jwtPayload')
-  // 
-  return c.json({"hello": "bhanu"}) // eg: { "sub": "1234567890", "name": "John Doe", "iat": 1516239022 }
-})
+// app.get('/auth/page', (c) => {
+//   return c.json({"hello": "bhanu"}) // eg: { "sub": "1234567890", "name": "John Doe", "iat": 1516239022 }
+// })
 
 
 
@@ -46,6 +45,13 @@ app.get("/v1/auth/products", (c) => {
 app.post("/v1/createAccount", createAccount);
 app.post("/v1/login", login);
 app.post("/v1/verify", getDetails)
+
+
+
+
+// products
+app.post("/v1/products/register", registerProducts)
+
 
 
 export default app;

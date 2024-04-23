@@ -1,7 +1,6 @@
 import { Context } from "hono";
 import { v4 as uuidv4 } from "uuid";
 import { Prisma } from "@prisma/client";
-// import {  Hashing } from "../utils/hashing";
 import { Hashing } from "../utils/hashing";
 
 import { databaseInstance } from "./database";
@@ -14,9 +13,9 @@ import { JWT_SECRET } from "../utils/constants";
 
 // create account
 export async function createAccount(c: Context) {
-  const body = await c.req.json();
-
+  
   try {
+    const body = await c.req.json();
     const username: string = body["username"];
     const password: string = body["password"];
     const email: string = body["email"];
