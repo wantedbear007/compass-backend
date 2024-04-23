@@ -13,7 +13,6 @@ import { JWT_SECRET } from "../utils/constants";
 
 // create account
 export async function createAccount(c: Context) {
-  
   try {
     const body = await c.req.json();
     const username: string = body["username"];
@@ -39,7 +38,7 @@ export async function createAccount(c: Context) {
         email: email,
         name: name,
         profile: profile,
-        unique: uuidv4(),
+        // unique: uuidv4(),
       },
     });
 
@@ -50,6 +49,13 @@ export async function createAccount(c: Context) {
       201
     );
   } catch (err: any) {
+    console.log(err);
+    // return c.json(
+    //   {
+    //     status: "Internal server errror.",
+    //   },
+    //   400
+    // );
     if (err instanceof Prisma.PrismaClientKnownRequestError) {
       if (err.code === "P2002") {
         return c.status(406);
@@ -95,6 +101,7 @@ export async function login(c: Context) {
 
     // payload
     const payload = {
+      id: user["userId"],
       username: username,
       email: user["email"],
       name: user["name"],
@@ -116,24 +123,23 @@ export async function login(c: Context) {
 }
 
 export async function getDetails(c: Context) {
-    const bhanu= await c.req.json()
-    console.log(bhanu["token"])
+  const bhanu = await c.req.json();
+  console.log(bhanu["token"]);
 
-    const lol = bhanu["token"]
-    const del = await verifyUser(lol)
-    console.log(del)
+  const lol = bhanu["token"];
+  const del = await verifyUser(lol);
+  console.log(del);
 
-    return c.json({"msg": bhanu["token"]})
+  return c.json({ msg: bhanu["token"] });
 }
 
 export async function verifyUser(token: string): Promise<boolean> {
-    try {
-        const res = await verify(token, JWT_SECRET)
-        console.log(res)
-        return res === null ? false : true
-    } catch(err: any) {
-        console.log(err)
-        return false
-
-    }
+  try {
+    const res = await verify(token, JWT_SECRET);
+    console.log(res);
+    return res === null ? false : true;
+  } catch (err: any) {
+    console.log(err);
+    return false;
+  }
 }

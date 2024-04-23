@@ -12,33 +12,32 @@ datasource db {
 }
 
 model User {
-  userId Int @id @unique @default(autoincrement())
-  createdAt DateTime @default(now())
-  email String @unique
-  username String @unique
-  password String
-  name String
-  unique String @unique
-  totalProducts Int @default(0)
-  profile String @default("https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg")
+  userId        Int      @id @unique @default(autoincrement())
+  createdAt     DateTime @default(now())
+  email         String   @unique
+  username      String   @unique
+  password      String
+  name          String
+  totalProducts Int      @default(0)
+  profile       String   @default("https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg")
 
   // relation field
-  products Product[]
+  products      Product[]
 }
 
 model Product {
-  id Int @id @unique @default(autoincrement())
-  productId Int @unique @default(autoincrement())
-  expireDate String
-  barCodeID String
-  name String
-  description String @default("NA")
-  region String @default("SouthEast Asia")
-  imageUrl String @default("https://i.pinimg.com/736x/32/47/eb/3247eba14cadb3a7475b8e7edd2e0755.jpg")
-  brand String
-  category String @default("Uncategorized")
+  id          Int      @id @unique @default(autoincrement())
+  authorId    Int      @unique
+  expireDate  String
+  barCodeID   String
+  name        String
+  description String   @default("NA")
+  region      String   @default("SouthEast Asia")
+  imageUrl    String   @default("https://i.pinimg.com/736x/32/47/eb/3247eba14cadb3a7475b8e7edd2e0755.jpg")
+  brand       String
+  category    String   @default("Uncategorized")
   createdDate DateTime @default(now())
   
   // relation field
-  author User @relation(fields: [productId], references: [userId])
+  author      User     @relation(fields: [authorId], references: [userId])
 }
