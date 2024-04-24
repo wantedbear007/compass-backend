@@ -34,7 +34,7 @@ export async function createAccount(c: Context) {
     await databaseInstance.user.create({
       data: {
         username,
-        password: hashedPassword,
+        password,
         email,
         name,
         profile,
@@ -49,9 +49,9 @@ export async function createAccount(c: Context) {
       201
     );
   } catch (err) {
-    if (err instanceof Prisma.PrismaClientKnownRequestError) {
-      console.log("hello from bhanu")
-    }
+    // if (err instanceof Prisma.PrismaClientKnownRequestError) {
+    //   console.log("hello from bhanu")
+    // }
     return c.json({ message: "Internal error" }, 500);
 
 
@@ -73,8 +73,8 @@ export async function createAccount(c: Context) {
 
 // login
 export async function login(c: Context) {
-  const body = await c.req.json();
   try {
+    const body = await c.req.json();
     const username: string = body["username"];
     const password: string = body["password"];
 
@@ -83,8 +83,8 @@ export async function login(c: Context) {
 
     const user = await databaseInstance.user.findUnique({
       where: {
-        username: username,
-        password: Hashing.decrypt(password, HASH),
+        username,
+        password,
       },
     });
 
