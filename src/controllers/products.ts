@@ -64,6 +64,19 @@ export default async function registerProducts(c: Context) {
       },
     });
 
+
+    // updating the number of products
+    await databaseInstance.user.update({
+      where: {
+        userId: authorId
+      },
+      data: {
+        totalProducts: {
+          increment: 1
+        }
+      }
+    })
+
     return c.json(
       {
         message: "Medicine added successfully.",

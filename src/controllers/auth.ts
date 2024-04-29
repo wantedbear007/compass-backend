@@ -28,7 +28,7 @@ export async function createAccount(c: Context) {
 
     // console.log(username, password, email, name, profile);
 
-    const hashedPassword: string = Hashing.encrypt(password, HASH);
+    // const hashedPassword: string = Hashing.encrypt(password, HASH);
     // console.log(hashedPassword)
 
     await databaseInstance.user.create({
