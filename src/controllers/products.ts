@@ -64,18 +64,22 @@ export default async function registerProducts(c: Context) {
       },
     });
 
+    // updating analytics on thinkspeak
+    fetch(
+      "https://api.thingspeak.com/update?api_key=3WDO7X5ULVECGUSZ&field1=0"
+    );
 
     // updating the number of products
     await databaseInstance.user.update({
       where: {
-        userId: authorId
+        userId: authorId,
       },
       data: {
         totalProducts: {
-          increment: 1
-        }
-      }
-    })
+          increment: 1,
+        },
+      },
+    });
 
     return c.json(
       {
@@ -170,6 +174,17 @@ export async function deleteProduct(c: Context) {
       },
     });
 
+    await databaseInstance.user.update({
+      where: {
+        userId: authorId,
+      },
+      data: {
+        totalProducts: {
+          decrement: 1,
+        },
+      },
+    });
+
     return c.json({ message: "Medicine deleted" }, 202);
   } catch (err: any) {
     if (err instanceof Prisma.PrismaClientKnownRequestError) {
@@ -184,7 +199,6 @@ export async function deleteProduct(c: Context) {
     databaseInstance.$disconnect;
   }
 }
-
 
 // to search products
 export async function searchProduct(c: Context) {
@@ -216,6 +230,19 @@ export async function searchProduct(c: Context) {
   } catch (err: any) {
     console.log(err);
     return c.json({ message: "internal error" }, 500);
+  } finally {
+    databaseInstance.$disconnect;
+  }
+}
+
+// get all products
+export async function allProducts(c: Context) {
+  try {
+    const products = await databaseInstance.product.findMany();
+
+    return c.json(products, 200);
+  } catch (err) {
+    return c.json({ msg: "Internal error occurred" }, 500);
   } finally {
     databaseInstance.$disconnect;
   }

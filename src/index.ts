@@ -3,6 +3,7 @@ import { cors } from "hono/cors";
 import { csrf } from "hono/csrf";
 import { createAccount, login } from "./controllers/auth";
 import registerProducts, {
+  allProducts,
   deleteProduct,
   getProducts,
   searchProduct,
@@ -38,5 +39,5 @@ app.post("/v1/products/register", registerProducts);
 app.get("/v1/products/getProducts", getProducts);
 app.post("/v1/products/delete", deleteProduct);
 app.get("/v1/products/search", searchProduct);
-
+app.get("/v1/products/getAll", allProducts)
 export default app;
