@@ -10,6 +10,10 @@ import { jwt } from "hono/jwt";
 import { decode, sign, verify } from "hono/jwt";
 import { env } from "hono/adapter";
 import { JWT_SECRET } from "../utils/constants";
+import {
+  verifyUser as verify0,
+  verifyUserResponse,
+} from "../middleware/verifyUser";
 
 // create account
 export async function createAccount(c: Context) {
@@ -53,7 +57,6 @@ export async function createAccount(c: Context) {
     //   console.log("hello from bhanu")
     // }
     return c.json({ message: "Internal error" }, 500);
-
 
     // console.log(err);
 
@@ -106,10 +109,10 @@ export async function login(c: Context) {
     const payload = {
       id: user["userId"],
       username: username,
-      email: user["email"],
-      name: user["name"],
+      // email: user["email"],
+      // name: user["name"],
       login: Date.now(),
-      profile: user["profile"],
+      // profile: user["profile"],
     };
 
     // signing jwt
@@ -135,6 +138,48 @@ export async function login(c: Context) {
 
 //   return c.json({ msg: bhanu["token"] });
 // }
+
+// get user details
+export async function getUserDetails(c: Context) {
+  try {
+    const token: string | undefined = c.req.query("token");
+
+    if (token === undefined) {
+      return c.json({ message: "Token required" }, 401);
+    }
+
+    console.log(token)
+
+    const userId: verifyUserResponse = await verify0(token);
+
+    console.log(userId)
+
+    if (userId.success === false || !userId.userId) {
+      return c.json({ message: "Invalid token" }, 401);
+    }
+
+    const authorId: number = userId.userId;
+
+    const user = await databaseInstance.user.findUnique({
+      where: {
+        userId: authorId,
+      },
+    });
+
+    return c.json({  
+      userId: user?.userId,
+      email: user?.email,
+      username: user?.email,
+      name: user?.name,
+      totalProducts: user?.totalProducts,
+      profile: user?.profile
+    }, 200);
+  } catch (err) {
+    return c.json({ message: "Internal error" }, 500);
+  } finally {
+    databaseInstance.$disconnect;
+  }
+}
 
 export async function verifyUser(token: string): Promise<boolean> {
   try {

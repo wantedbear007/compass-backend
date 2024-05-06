@@ -247,3 +247,79 @@ export async function allProducts(c: Context) {
     databaseInstance.$disconnect;
   }
 }
+
+export async function filter(c: Context) {
+  try {
+    // const token = c.req.header("token");
+
+    // if (token === undefined) {
+    //   return c.json({ message: "Invalid request" }, 401);
+    // }
+    // const userId: verifyUserResponse = await verifyUser(token);
+
+    // if (userId.success === false || !userId.userId)
+    //   return c.json({ message: "Invalid token" }, 401);
+
+    // const authorId: number = userId.userId;
+    const timeline = c.req.param("timeline");
+    const today: Date = new Date();
+    console.log("below is the timeline");
+    console.log(timeline);
+
+    let products = await databaseInstance.product.findMany({});
+
+    products = products.filter((e) => {
+      if (
+        differenceInMonths(new Date(), new Date(e.expireDate)) <=
+        parseInt(timeline)
+      ) {
+        return true;
+      } else return false;
+    });
+
+    return c.json(products, 200);
+  } catch (err) {
+    return c.json({ messaage: "Something wrong" }, 500);
+  } finally {
+    databaseInstance.$disconnect;
+  }
+}
+
+// get difference in months
+function differenceInMonths(startDate: Date, endDate: Date): number {
+  return (
+    (endDate.getFullYear() - startDate.getFullYear()) * 12 +
+    (endDate.getMonth() - startDate.getMonth())
+  );
+}
+
+function checkDifference(
+  startDate: Date,
+  endDate: Date,
+  difference: number = 2
+): boolean {
+  Date;
+
+  if (differenceInMonths(startDate, endDate) < difference) {
+    return true;
+  } else return false;
+}
+
+// delete product endpoint
+export async function betaDeleteProduct(c: Context) {
+  try {
+    const productId = c.req.param("id");
+
+    await databaseInstance.product.delete({
+      where: {
+        id: parseInt(productId),
+      },
+    });
+
+    return c.json({ msg: "Product deleted successfully" }, 201);
+  } catch (err) {
+    return c.json({ msg: "Internal server error" }, 500);
+  } finally {
+    databaseInstance.$disconnect;
+  }
+}
