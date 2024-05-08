@@ -3,25 +3,22 @@
     "dev": "wrangler dev src/index.ts",
     "deploy": "wrangler deploy --minify src/index.ts",
     "migrate": "npx prisma migrate dev --name init",
-    "generate": "npx prisma generate --no-engine"
+    "generate": "npx prisma generate --no-engine",
+    "dev:remote": "wrangler dev src/index.ts --remote"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^5.12.1",
     "@prisma/client": "^5.12.1",
     "@prisma/extension-accelerate": "^1.0.0",
-    "bcrpyt": "^2.0.0",
     "hono": "^4.2.6",
     "jsonwebtoken": "^9.0.2",
     "pg": "^8.11.5",
     "ts-node": "^10.9.2",
-    "typescript": "^5.4.5",
-    "uuid": "^9.0.1"
+    "typescript": "^5.4.5"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20240403         .0",
     "@types/argon2": "^0.15.0",
-    "@types/bcrypt": "^5.0.2",
-    "@types/jsonwebtoken": "^9.0.6",
     "@types/node": "^20.12.7",
     "@types/pg": "^8.11.5",
     "@types/uuid": "^9.0.8",

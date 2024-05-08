@@ -169,7 +169,7 @@ export async function getUserDetails(c: Context) {
     return c.json({  
       userId: user?.userId,
       email: user?.email,
-      username: user?.email,
+      username: user?.username,
       name: user?.name,
       totalProducts: user?.totalProducts,
       profile: user?.profile
