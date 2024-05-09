@@ -3,8 +3,7 @@
     "dev": "wrangler dev src/index.ts",
     "deploy": "wrangler deploy --minify src/index.ts",
     "migrate": "npx prisma migrate dev --name init",
-    "generate": "npx prisma generate --no-engine",
-    "dev:remote": "wrangler dev src/index.ts --remote"
+    "generate": "npx prisma generate --no-engine"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^5.12.1",

@@ -1,6 +1,5 @@
 import { Context } from "hono";
 import { v4 as uuidv4 } from "uuid";
-import { Prisma } from "@prisma/client";
 import { Hashing } from "../utils/hashing";
 
 import { databaseInstance } from "./database";
