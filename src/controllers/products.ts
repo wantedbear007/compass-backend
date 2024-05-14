@@ -120,6 +120,9 @@ export async function getProducts(c: Context) {
       where: {
         authorId: authorId,
       },
+      orderBy: {
+        createdDate: "desc"
+      }
     });
 
     let allProducts: productModel[];

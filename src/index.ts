@@ -12,7 +12,7 @@ import registerProducts, {
 } from "./controllers/products";
 import { bodyLimit } from "hono/body-limit";
 import { keys } from "./utils/constants";
-import { apiKey } from "./middleware/apiKeyAuth";
+import { apiKey } from "./middleware/security";
 // import { rateLimiter } from "hono-rate-limiter";
 
 // 1krf3w61D2BeU6CAt5P6
@@ -25,18 +25,11 @@ type Bindings = {
   JWT_SECRET: string;
 };
 
+app.use("/v1/*", apiKey);
 app.use("/v1/*", cors());
 app.use(csrf());
 
-// const middle = async (_: Context, next: Next) => {
-//   console.log("from middle ware");
-//   await next();
-// };
 
-
-
-
-app.use("/v1/*", apiKey);
 
 app.get("/", (c: Context) => {
   return c.json(
@@ -51,23 +44,23 @@ app.get("/", (c: Context) => {
 
 app.post(
   "/v1/auth/createAccount",
-  // bodyLimit({
-  //   maxSize: 50 * 1024, // 50kb
-  //   onError: (c) => {
-  //     return c.json({ message: "Overflow to much content" }, 413);
-  //   },
-  // }),
+  bodyLimit({
+    maxSize: 50 * 1024, // 50kb
+    onError: (c) => {
+      return c.json({ message: "Overflow to much content" }, 413);
+    },
+  }),
   // loginRateLimiter,
   createAccount
 );
 app.post(
   "/v1/auth/login",
-  // bodyLimit({
-  //   maxSize: 50 * 1024, // 50kb
-  //   onError: (c) => {
-  //     return c.json({ message: "Overflow to much content" }, 413);
-  //   },
-  // }),
+  bodyLimit({
+    maxSize: 50 * 1024, // 50kb
+    onError: (c) => {
+      return c.json({ message: "Overflow to much content" }, 413);
+    },
+  }),
   login
 );
 app.get("v1/auth/getUserDetails", getUserDetails);
