@@ -3,21 +3,27 @@ import { verifyUser, verifyUserResponse } from "../middleware/verifyUser";
 import { databaseInstance } from "./database";
 import { productModel } from "../models/productModel";
 import { Prisma } from "@prisma/client";
+import { verify } from "hono/jwt";
+import { JWT_SECRET } from "../utils/constants";
 
 export default async function registerProducts(c: Context) {
-  const token = c.req.header("token");
+  const token = c.req.header("token")!;
 
-  if (token === undefined) {
-    return c.json({ message: "Invalid request" }, 401);
-  }
-  const userId: verifyUserResponse = await verifyUser(token);
+  // if (token === undefined) {
+  //   return c.json({ message: "Invalid request" }, 401);
+  // }
+  // const userId: verifyUserResponse = await verifyUser(token);
 
-  if (userId.success === false || !userId.userId)
-    return c.json({ message: "Invalid token" }, 401);
+  // if (userId.success === false || !userId.userId)
+  //   return c.json({ message: "Invalid token" }, 401);
 
-  const authorId: number = userId.userId;
+  // const authorId: number = userId.userId;
 
   // if (!userId) return c.json({ message: "Invalid token" }, 401);
+  const decoded = await verify(token.slice(1, token.length - 1), JWT_SECRET);
+
+  const authorId: number = decoded["id"];
+
 
   try {
     const body = await c.req.json();
@@ -65,9 +71,9 @@ export default async function registerProducts(c: Context) {
     });
 
     // updating analytics on thinkspeak
-    fetch(
-      "https://api.thingspeak.com/update?api_key=3WDO7X5ULVECGUSZ&field1=0"
-    );
+    // fetch(
+    //   "https://api.thingspeak.com/update?api_key=3WDO7X5ULVECGUSZ&field1=0"
+    // );
 
     // updating the number of products
     await databaseInstance.user.update({
@@ -103,17 +109,19 @@ export default async function registerProducts(c: Context) {
 
 // to get medicines
 export async function getProducts(c: Context) {
-  const token = c.req.header("token");
+  const token = c.req.header("token")!;
 
-  if (token === undefined) {
-    return c.json({ message: "Invalid request" }, 401);
-  }
-  const userId: verifyUserResponse = await verifyUser(token);
+  // if (token === undefined) {
+  //   return c.json({ message: "Invalid request" }, 401);
+  // }
+  // const userId: verifyUserResponse = await verifyUser(token);
 
-  if (userId.success === false || !userId.userId)
-    return c.json({ message: "Invalid token" }, 401);
+  // if (userId.success === false || !userId.userId)
+  //   return c.json({ message: "Invalid token" }, 401);
+  const decoded = await verify(token.slice(1, token.length - 1), JWT_SECRET);
 
-  const authorId: number = userId.userId;
+
+  const authorId: number = decoded["id"];
 
   try {
     const products = await databaseInstance.product.findMany({
@@ -153,17 +161,12 @@ export async function getProducts(c: Context) {
 }
 
 export async function deleteProduct(c: Context) {
-  const token = c.req.header("token");
+  const token = c.req.header("token")!;
+  const decoded = await verify(token.slice(1, token.length - 1), JWT_SECRET);
 
-  if (token === undefined) {
-    return c.json({ message: "Invalid request" }, 401);
-  }
-  const userId: verifyUserResponse = await verifyUser(token);
 
-  if (userId.success === false || !userId.userId)
-    return c.json({ message: "Invalid token" }, 401);
+  const authorId: number = decoded["id"];
 
-  const authorId: number = userId.userId;
 
   try {
     const body = await c.req.json();
@@ -205,17 +208,13 @@ export async function deleteProduct(c: Context) {
 
 // to search products
 export async function searchProduct(c: Context) {
-  const token = c.req.header("token");
+  const token = c.req.header("token")!;
 
-  if (token === undefined) {
-    return c.json({ message: "Invalid request" }, 401);
-  }
-  const userId: verifyUserResponse = await verifyUser(token);
+  const decoded = await verify(token.slice(1, token.length - 1), JWT_SECRET);
 
-  if (userId.success === false || !userId.userId)
-    return c.json({ message: "Invalid token" }, 401);
 
-  const authorId: number = userId.userId;
+  const authorId: number = decoded["id"];
+
 
   try {
     const barCodeId: string | undefined = c.req.query("q");

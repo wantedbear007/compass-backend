@@ -12,7 +12,7 @@ import registerProducts, {
 } from "./controllers/products";
 import { bodyLimit } from "hono/body-limit";
 import { keys } from "./utils/constants";
-import { apiKey } from "./middleware/security";
+import { apiKey, tokenVerification } from "./middleware/security";
 // import { rateLimiter } from "hono-rate-limiter";
 
 // 1krf3w61D2BeU6CAt5P6
@@ -26,6 +26,9 @@ type Bindings = {
 };
 
 app.use("/v1/*", apiKey);
+app.use("/v1/products/*", tokenVerification)
+app.use("/v1/auth/getUserDetails*", tokenVerification)
+
 app.use("/v1/*", cors());
 app.use(csrf());
 

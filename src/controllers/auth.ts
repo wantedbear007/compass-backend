@@ -110,7 +110,7 @@ export async function login(c: Context) {
       username: username,
       // email: user["email"],
       // name: user["name"],
-      login: Date.now(),
+      // login: Date.now(),
       // profile: user["profile"],
     };
 

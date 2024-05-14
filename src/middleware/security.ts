@@ -1,6 +1,8 @@
 import { Context, Next } from "hono";
-import { keys } from "../utils/constants";
+import { JWT_SECRET, keys } from "../utils/constants";
 import { bodyLimit } from "hono/body-limit";
+import { verify } from "hono/jwt";
+import { JwtTokenInvalid } from "hono/utils/jwt/types";
 
 // for checking api keys
 export const apiKey = async (c: Context, next: Next) => {
@@ -23,6 +25,37 @@ export const apiKey = async (c: Context, next: Next) => {
     return c.json({ message: "Internal server error" }, 500);
   }
 };
+
+export const tokenVerification = async (c: Context, next: Next) => {
+  try {
+
+    const token = c.req.header("token");
+
+    if (token == undefined) {
+      return c.json({message: "Token required"}, 401)
+    }
+
+    const decoded = await verify(token.slice(1, token.length - 1), JWT_SECRET);
+
+    if (decoded) {
+      await next();
+    } else {
+      return c.json({message: "Not authenticated"}, 401)
+      
+    }
+
+
+  } catch (err) {
+
+    if (err instanceof JwtTokenInvalid) {
+      return c.json({message: "Invalid token"}, 401)
+    }
+
+    return c.json({message: "Internal server error. "}, 500)
+
+
+  }
+}
 
 // to limit body
 
