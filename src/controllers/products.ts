@@ -24,7 +24,6 @@ export default async function registerProducts(c: Context) {
 
   const authorId: number = decoded["id"];
 
-
   try {
     const body = await c.req.json();
 
@@ -120,7 +119,6 @@ export async function getProducts(c: Context) {
   //   return c.json({ message: "Invalid token" }, 401);
   const decoded = await verify(token.slice(1, token.length - 1), JWT_SECRET);
 
-
   const authorId: number = decoded["id"];
 
   try {
@@ -129,8 +127,8 @@ export async function getProducts(c: Context) {
         authorId: authorId,
       },
       orderBy: {
-        createdDate: "desc"
-      }
+        createdDate: "desc",
+      },
     });
 
     let allProducts: productModel[];
@@ -164,9 +162,7 @@ export async function deleteProduct(c: Context) {
   const token = c.req.header("token")!;
   const decoded = await verify(token.slice(1, token.length - 1), JWT_SECRET);
 
-
   const authorId: number = decoded["id"];
-
 
   try {
     const body = await c.req.json();
@@ -212,9 +208,7 @@ export async function searchProduct(c: Context) {
 
   const decoded = await verify(token.slice(1, token.length - 1), JWT_SECRET);
 
-
   const authorId: number = decoded["id"];
-
 
   try {
     const barCodeId: string | undefined = c.req.query("q");
@@ -222,9 +216,15 @@ export async function searchProduct(c: Context) {
     // console.log(barCodeId?.slice())
 
     const products = await databaseInstance.product.findMany({
+      orderBy: {
+        expireDate: "desc"
+      },
       where: {
         authorId: authorId,
-        barCodeID: barCodeId?.slice(),
+        barCodeID: {
+          startsWith: barCodeId?.slice()
+        }
+        // barCodeID: barCodeId?.slice(),
       },
     });
 
@@ -268,7 +268,11 @@ export async function filter(c: Context) {
     console.log("below is the timeline");
     console.log(timeline);
 
-    let products = await databaseInstance.product.findMany({});
+    let products = await databaseInstance.product.findMany({
+      orderBy: {
+        expireDate: "desc",
+      },
+    });
 
     products = products.filter((e) => {
       if (
@@ -319,6 +323,35 @@ export async function betaDeleteProduct(c: Context) {
     });
 
     return c.json({ msg: "Product deleted successfully" }, 201);
+  } catch (err) {
+    return c.json({ msg: "Internal server error" }, 500);
+  } finally {
+    databaseInstance.$disconnect;
+  }
+}
+
+// get expired products
+export async function expiredProducts(c: Context) {
+  try {
+    const token = c.req.header("token")!;
+    const decoded = await verify(token.slice(1, token.length - 1), JWT_SECRET);
+
+    const authorId: number = decoded["id"];
+
+    const today = new Date().toISOString().split("T")[0];
+    const response = await databaseInstance.product.findMany({
+      orderBy: {
+        createdDate: "desc",
+      },
+      where: {
+        authorId: authorId,
+        expireDate: {
+          lt: today,
+        },
+      },
+    });
+
+    return c.json(response, 200);
   } catch (err) {
     return c.json({ msg: "Internal server error" }, 500);
   } finally {

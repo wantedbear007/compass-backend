@@ -6,6 +6,7 @@ import registerProducts, {
   allProducts,
   betaDeleteProduct,
   deleteProduct,
+  expiredProducts,
   filter,
   getProducts,
   searchProduct,
@@ -76,6 +77,8 @@ app.get("/v1/products/getProducts", getProducts);
 app.post("/v1/products/delete", deleteProduct);
 app.get("/v1/products/search", searchProduct);
 app.get("/v1/products/getAll", allProducts);
+app.get("/v1/products/expiredProducts", expiredProducts);
+
 app.get("/v1/products/expiringIn/:timeline", filter);
 app.get("/v1/products/deleteBeta/:id", betaDeleteProduct);
 export default app;
