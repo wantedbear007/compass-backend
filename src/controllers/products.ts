@@ -165,13 +165,16 @@ export async function deleteProduct(c: Context) {
   const authorId: number = decoded["id"];
 
   try {
-    const body = await c.req.json();
 
-    const productID: number = body["id"];
+    // const productID: number = body["id"];
+    const productID = c.req.query("product");
+    if (productID == undefined) {
+      return c.json({message: "Product id required !"}, 400);
+    }
 
     await databaseInstance.product.delete({
       where: {
-        id: productID,
+        id: parseInt(productID),
         authorId: authorId,
       },
     });
@@ -189,14 +192,15 @@ export async function deleteProduct(c: Context) {
 
     return c.json({ message: "Medicine deleted" }, 202);
   } catch (err: any) {
-    if (err instanceof Prisma.PrismaClientKnownRequestError) {
-      if (err.code === "P2025") {
-        return c.json({ message: "no products associated with this id" }, 400);
-      }
-    }
+    // if (err instanceof Prisma.PrismaClientKnownRequestError) {
+    //   if (err.code === "P2025") {
+    //     return c.json({ message: "no products associated with this id" }, 400);
+    //   }
+    // }
     console.log(err);
+    
 
-    return c.json({ message: "Internal server error" }, 500);
+    return c.json({ message: err.toString() }, 500);
   } finally {
     databaseInstance.$disconnect;
   }
@@ -314,6 +318,7 @@ function checkDifference(
 // delete product endpoint
 export async function betaDeleteProduct(c: Context) {
   try {
+    // const 
     const productId = c.req.param("id");
 
     await databaseInstance.product.delete({
@@ -353,8 +358,10 @@ export async function expiredProducts(c: Context) {
 
     return c.json(response, 200);
   } catch (err) {
-    return c.json({ msg: "Internal server error" }, 500);
+    return c.json({ msg: err }, 500);
   } finally {
     databaseInstance.$disconnect;
   }
 }
+
+// to get all the activities

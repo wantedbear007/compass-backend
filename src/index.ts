@@ -4,7 +4,6 @@ import { csrf } from "hono/csrf";
 import { createAccount, getUserDetails, login } from "./controllers/auth";
 import registerProducts, {
   allProducts,
-  betaDeleteProduct,
   deleteProduct,
   expiredProducts,
   filter,
@@ -18,8 +17,6 @@ import { apiKey, tokenVerification } from "./middleware/security";
 
 // 1krf3w61D2BeU6CAt5P6
 
-
-
 export const app = new Hono<{ Bindings: Bindings }>();
 
 type Bindings = {
@@ -27,13 +24,11 @@ type Bindings = {
 };
 
 app.use("/v1/*", apiKey);
-app.use("/v1/products/*", tokenVerification)
-app.use("/v1/auth/getUserDetails*", tokenVerification)
+app.use("/v1/products/*", tokenVerification);
+app.use("/v1/auth/getUserDetails*", tokenVerification);
 
 app.use("/v1/*", cors());
 app.use(csrf());
-
-
 
 app.get("/", (c: Context) => {
   return c.json(
@@ -74,16 +69,14 @@ app.get("v1/auth/getUserDetails", getUserDetails);
 // products services
 app.post("/v1/products/register", registerProducts);
 app.get("/v1/products/getProducts", getProducts);
-app.post("/v1/products/delete", deleteProduct);
+app.delete("/v1/products/delete", deleteProduct);
 app.get("/v1/products/search", searchProduct);
 app.get("/v1/products/getAll", allProducts);
 app.get("/v1/products/expiredProducts", expiredProducts);
-
 app.get("/v1/products/expiringIn/:timeline", filter);
-app.get("/v1/products/deleteBeta/:id", betaDeleteProduct);
+// app.get("/v1/products/deleteBeta/:id", betaDeleteProduct);
 export default app;
 
 // Todo
 // implement routes
-// add middleware for auth
 // add protected endpoints
