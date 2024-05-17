@@ -94,16 +94,6 @@ export async function login(c: Context) {
       return c.json({ msg: "Not authenticated." }, 400);
     }
 
-    // env;
-    // const lol = await c.env.JWT_SECRET;
-    // console.log(c.env.jwtMiddleware)
-
-    // console.log("something")
-    // console.log(lol)
-
-    // const token = jwt1.sign({username: username}, JWT_SECRET)
-    //   console.log(token)
-
     // payload
     const payload = {
       id: user["userId"],
@@ -114,8 +104,32 @@ export async function login(c: Context) {
       // profile: user["profile"],
     };
 
+    const activitiesPromise = databaseInstance.activities.create({
+      data: {
+        authorId: user["userId"],
+        title: "New login detected",
+        category: "Uncategorized",
+        description: "Account accessed on another device.",
+      }
+    })
+
+    const tokenCreation = sign(payload, JWT_SECRET)
+
+    const [activity, token] = await Promise.all([activitiesPromise, tokenCreation]);
+
+
+
+    // await databaseInstance.activities.create({
+    //   data: {
+    //     authorId: user["userId"],
+    //     title: "New login detected",
+    //     category: "Uncategorized",
+    //     description: "Account accessed on another device.",
+    //   },
+    // });
+
     // signing jwt
-    const token = await sign(payload, JWT_SECRET);
+    // const token = await sign(payload, JWT_SECRET);
 
     return c.json({ status: "success", token: token }, 200);
   } catch (err: any) {
@@ -147,11 +161,11 @@ export async function getUserDetails(c: Context) {
       return c.json({ message: "Token required" }, 401);
     }
 
-    console.log(token)
+    // console.log(token);
 
     const userId: verifyUserResponse = await verify0(token);
 
-    console.log(userId)
+    // console.log(userId);
 
     if (userId.success === false || !userId.userId) {
       return c.json({ message: "Invalid token" }, 401);
@@ -165,14 +179,17 @@ export async function getUserDetails(c: Context) {
       },
     });
 
-    return c.json({  
-      userId: user?.userId,
-      email: user?.email,
-      username: user?.username,
-      name: user?.name,
-      totalProducts: user?.totalProducts,
-      profile: user?.profile
-    }, 200);
+    return c.json(
+      {
+        userId: user?.userId,
+        email: user?.email,
+        username: user?.username,
+        name: user?.name,
+        totalProducts: user?.totalProducts,
+        profile: user?.profile,
+      },
+      200
+    );
   } catch (err) {
     return c.json({ message: "Internal error" }, 500);
   } finally {
