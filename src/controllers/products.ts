@@ -2,7 +2,6 @@ import { Context } from "hono";
 import { verifyUser, verifyUserResponse } from "../middleware/verifyUser";
 import { databaseInstance } from "./database";
 import { productModel } from "../models/productModel";
-import { Prisma } from "@prisma/client";
 import { verify } from "hono/jwt";
 import { JWT_SECRET } from "../utils/constants";
 
@@ -58,38 +57,8 @@ export default async function registerProducts(c: Context) {
       },
     });
 
-    // updating analytics on thinkspeak
-    // fetch(
-    //   "https://api.thingspeak.com/update?api_key=3WDO7X5ULVECGUSZ&field1=0"
-    // );
-
-    // updating the number of products
-
-    
     // for updating product count
     const incrementProductCount = databaseInstance.user.update({
-      where: {
-        userId: authorId,
-      },
-      data: {
-        totalProducts: {
-          increment: 1
-        }
-      }
-    })
-
-    // for registering activities
-    const activityRecorder = databaseInstance.activities.create({
-        data: {
-          authorId,
-          title: "New product registered",
-          category: "registration",
-          
-        }        
-    })
-
-
-    await databaseInstance.user.update({
       where: {
         userId: authorId,
       },
@@ -100,15 +69,39 @@ export default async function registerProducts(c: Context) {
       },
     });
 
-    // to register products in activities
-    await databaseInstance.activities.create({
+    // for registering activities
+    const activityRecorder = databaseInstance.activities.create({
       data: {
-        authorId: authorId,
-        title: "New Medicine registered",
-        category: "create",
-        description: name,
-      }
-    })
+        authorId,
+        title: "New product registered",
+        category: "Inventory Management",
+        description: `Registered ${name}`,
+        type: 2,
+      },
+    });
+
+    await Promise.all([incrementProductCount, activityRecorder]);
+
+    // await databaseInstance.user.update({
+    //   where: {
+    //     userId: authorId,
+    //   },
+    //   data: {
+    //     totalProducts: {
+    //       increment: 1,
+    //     },
+    //   },
+    // });
+
+    // // to register products in activities
+    // await databaseInstance.activities.create({
+    //   data: {
+    //     authorId: authorId,
+    //     title: "New Medicine registered",
+    //     category: "create",
+    //     description: name,
+    //   }
+    // })
 
     return c.json(
       {
@@ -195,7 +188,7 @@ export async function deleteProduct(c: Context) {
       },
     });
 
-    await databaseInstance.user.update({
+    const decrementProduct = databaseInstance.user.update({
       where: {
         userId: authorId,
       },
@@ -206,14 +199,17 @@ export async function deleteProduct(c: Context) {
       },
     });
 
-    await databaseInstance.activities.create({
+    const recordActivity = databaseInstance.activities.create({
       data: {
         authorId: authorId,
         title: "Medicine deleted",
-        category: "delete",
+        category: "Inventory Management",
         description: productID,
-      }
-    })
+        type: 3,
+      },
+    });
+
+    await Promise.all([decrementProduct, recordActivity]);
 
     return c.json({ message: "Medicine deleted" }, 202);
   } catch (err: any) {
@@ -313,7 +309,7 @@ export async function filter(c: Context) {
 
     return c.json(products, 200);
   } catch (err) {
-    return c.json({ messaage: "Something wrong" }, 500);
+    return c.json({ message: "Something wrong" }, 500);
   } finally {
     databaseInstance.$disconnect;
   }
@@ -383,6 +379,28 @@ export async function expiredProducts(c: Context) {
     return c.json(response, 200);
   } catch (err) {
     return c.json({ msg: err }, 500);
+  } finally {
+    databaseInstance.$disconnect;
+  }
+}
+
+// scheduled delete
+export async function scheduledDelete(c: Context) {
+  const sixHoursAgo = new Date();
+  sixHoursAgo.setHours(sixHoursAgo.getHours() - 12);
+
+  try {
+    await databaseInstance.activities.deleteMany({
+      where: {
+        createdDate: {
+          lt: sixHoursAgo,
+        },
+      },
+    });
+
+    return c.json({ message: "Schedule deletion successful" }, 202);
+  } catch (err) {
+    return c.json({ message: "Server error " + err }, 500);
   } finally {
     databaseInstance.$disconnect;
   }

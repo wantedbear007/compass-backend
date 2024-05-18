@@ -49,5 +49,6 @@ model Activities {
   title String
   createdDate DateTime @default(now())
   description String @default("NA")
+  type Int @default(1)
   authorId Int
 }

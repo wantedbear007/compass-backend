@@ -108,14 +108,15 @@ export async function login(c: Context) {
       data: {
         authorId: user["userId"],
         title: "New login detected",
-        category: "Uncategorized",
+        category: "Authentication",
         description: "Account accessed on another device.",
+        type: 4
       }
     })
 
     const tokenCreation = sign(payload, JWT_SECRET)
 
-    const [activity, token] = await Promise.all([activitiesPromise, tokenCreation]);
+    const [token, activities] = await Promise.all([tokenCreation, activitiesPromise ]);
 
 
 

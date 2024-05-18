@@ -8,11 +8,13 @@ import registerProducts, {
   expiredProducts,
   filter,
   getProducts,
+  scheduledDelete,
   searchProduct,
 } from "./controllers/products";
 import { bodyLimit } from "hono/body-limit";
 import { keys } from "./utils/constants";
 import { apiKey, tokenVerification } from "./middleware/security";
+import { getActivities } from "./controllers/activities";
 // import { rateLimiter } from "hono-rate-limiter";
 
 // 1krf3w61D2BeU6CAt5P6
@@ -26,6 +28,7 @@ type Bindings = {
 app.use("/v1/*", apiKey);
 app.use("/v1/products/*", tokenVerification);
 app.use("/v1/auth/getUserDetails*", tokenVerification);
+app.use("/v1/auth/getActivities*", tokenVerification);
 
 app.use("/v1/*", cors());
 app.use(csrf());
@@ -63,6 +66,7 @@ app.post(
   login
 );
 app.get("v1/auth/getUserDetails", getUserDetails);
+app.get("/v1/auth/getActivities", getActivities)
 // for debug
 // app.post("/v1/verify", getDetails);
 
@@ -74,6 +78,9 @@ app.get("/v1/products/search", searchProduct);
 app.get("/v1/products/getAll", allProducts);
 app.get("/v1/products/expiredProducts", expiredProducts);
 app.get("/v1/products/expiringIn/:timeline", filter);
+
+// schedule operation endpoints
+app.delete("/v1/scheduledOperations", scheduledDelete);
 // app.get("/v1/products/deleteBeta/:id", betaDeleteProduct);
 export default app;
 
